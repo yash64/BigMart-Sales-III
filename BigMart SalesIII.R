@@ -97,5 +97,37 @@ dat$Outlet_Age <- 2013 - dat$Outlet_Establishment_Year
 dat$Outlet_Establishment_Year <- NULL
 
 #creating dummy variables for categorical attributes
+#before creating dummy variables we need to convert char attributes to factor
 
+#Filter(is.character, dat)
+#a <- select_if(dat,is.character)
+#dat[,sapply(dat,is.numeric)] 
+#unlist(lapply(dat, is.character))
 
+# col <- colnames(Filter(is.character,dat))
+# dat[col] <- lapply(dat[col], factor)
+# str(dat)
+# 
+# dat <- model.matrix(~Item_Fat_Content +Item_Type +Outlet_Identifier +Outlet_Size +Outlet_Location_Type +Outlet_Type +Item_Category+0, data = dat)
+# 
+# dat_copy <- dat
+# for (i in col[-1]){
+# for(level in unique(dat_copy[i])){
+#   dat_copy[paste("dummy", level, sep = "_")] <- ifelse(dat_copy$strcol == level, 1, 0)
+# }
+# }
+# 
+# for (i in col) {f = unique(dat$i)}
+
+# new_train = as.data.frame(model.matrix( ~ . + 0, data = new_train))
+# new_test = as.data.frame(model.matrix( ~ . + 0, data = new_test))
+
+##detaching train and test sets before creating the model
+train_dat <- dat[1:nrow(train),]
+test_dat <- dat[-(1:nrow(train)),]
+
+test_dat$Item_Outlet_Sales <- NULL
+
+##building the model
+lr_model <- lm(Item_Outlet_Sales ~ Item_Fat_Content+Item_Visibility+Item_Weight+Item_MRP+Outlet_Size+Outlet_Age+Item_Category+Outlet_Location_Type, data = train_dat)
+summary(lr_model)
