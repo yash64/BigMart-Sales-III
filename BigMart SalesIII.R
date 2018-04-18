@@ -3,6 +3,7 @@ library(ggplot2)
 library(reshape)
 library(plyr)
 library(stringr)
+library(randomForest)
 
 setwd("D:/Users/1015624/GE Internal/My Docs/Work/Bigmart")
 
@@ -129,5 +130,21 @@ test_dat <- dat[-(1:nrow(train)),]
 test_dat$Item_Outlet_Sales <- NULL
 
 ##building the model
-lr_model <- lm(Item_Outlet_Sales ~ Item_Fat_Content+Item_Visibility+Item_Weight+Item_MRP+Outlet_Size+Outlet_Age+Item_Category+Outlet_Location_Type, data = train_dat)
+#Linear regression model
+lr_model <- lm(Item_Outlet_Sales ~ Item_Visibility+Item_MRP+Outlet_Size+Outlet_Age+Outlet_Location_Type, data = train_dat)
 summary(lr_model)
+
+outlet_sales <- predict(lr_model, newdata = test_dat)
+
+rmse <- sqrt(mean((lr_model$residuals)^2))
+
+test_dat$Item_Outlet_Sales <- outlet_sales
+
+#Random forest model
+rf_model <- randomForest()
+
+result <- test_dat[, c("Item_Identifier", "Outlet_Identifier", "Item_Outlet_Sales")]
+
+write.csv(result, "result.csv", row.names = FALSE)
+
+
