@@ -1,3 +1,8 @@
+
+#set working directory
+setwd("D:/Users/.../Bigmart")
+
+#load required libraries
 library(dplyr)
 library(ggplot2)
 library(reshape)
@@ -5,8 +10,7 @@ library(plyr)
 library(stringr)
 library(randomForest)
 
-setwd("D:/Users/1015624/GE Internal/My Docs/Work/Bigmart")
-
+#read the datasets
 train <- read.csv("BigMartSales_Train.csv",stringsAsFactors = FALSE)
 test <- read.csv("BigMartSales_Test.csv",stringsAsFactors = FALSE)
 
@@ -141,10 +145,32 @@ rmse <- sqrt(mean((lr_model$residuals)^2))
 test_dat$Item_Outlet_Sales <- outlet_sales
 
 #Random forest model
-rf_model <- randomForest()
+col <- colnames(Filter(is.character,train_dat))
+train_dat[col] <- lapply(train_dat[col], factor)
+
+col <- colnames(Filter(is.character,test_dat))
+test_dat[col] <- lapply(test_dat[col], factor)
+
+#variance explained by below model is 57.88%
+#rf_model <- randomForest(Item_Outlet_Sales ~ Item_Fat_Content+Item_Weight+Item_Category+Item_Visibility+Item_MRP+Outlet_Size+Outlet_Age+Outlet_Location_Type, 
+#                         data = train_dat, ntree = 750)
+
+#variance explained by including all variables except Item_Identifier 58.15%
+rf_model <- randomForest(Item_Outlet_Sales ~ . -Item_Identifier, 
+                         data = train_dat, ntree = 750)
+
+print(rf_model)
+
+#predict outlet sales on test dataset
+outlet_sales <- predict(rf_model, newdata = test_dat)
+test_dat$Item_Outlet_Sales <- outlet_sales
+
+#getTree(rf_model, 1)
 
 result <- test_dat[, c("Item_Identifier", "Outlet_Identifier", "Item_Outlet_Sales")]
 
 write.csv(result, "result.csv", row.names = FALSE)
+
+
 
 
